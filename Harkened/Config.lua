@@ -215,6 +215,11 @@ throttleBox:SetScript("OnEscapePressed", function(self)
     self:SetText(tostring(Harkened.db.throttle))
     self:ClearFocus()
 end)
+throttleBox:SetScript("OnEditFocusLost", function(self)
+    local val = math.max(0, math.min(3600, tonumber(self:GetText()) or Harkened.db.throttle))
+    Harkened.db.throttle = val
+    self:SetText(tostring(val))
+end)
 
 -- ── Keywords ──────────────────────────────────────────────────────────────
 
@@ -293,7 +298,7 @@ function Harkened:InitSlash()
         arg = arg or ""
 
         if cmd == "" then
-            Settings.OpenToCategory(Harkened.settingsCategory)
+            Settings.OpenToCategory(Harkened.settingsCategory:GetID())
 
         elseif cmd == "on" then
             Harkened.db.enabled = true

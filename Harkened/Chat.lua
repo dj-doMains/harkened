@@ -18,7 +18,10 @@ local chatFrame = CreateFrame("Frame")
 local function onChatMessage(_, _, ...)
     if not Harkened.db.enabled then return end
 
-    local text = ...  -- first payload argument is the message text
+    local text, sender = ...  -- arg1 = message text, arg2 = sender name
+    -- Ignore messages sent by the player themselves (sender may include "-RealmName")
+    local senderBase = sender and sender:match("^([^%-]+)") or sender
+    if senderBase == UnitName("player") then return end
 
     for _, keyword in ipairs(Harkened.db.keywords) do
         if text:lower():find(keyword:lower(), 1, true) then
