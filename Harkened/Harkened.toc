@@ -1,0 +1,12 @@
+## Interface: 120001
+## Title: Harkened
+## Notes: Plays a sound alert when your name is mentioned in chat.
+## Author:
+## Version: 0.1.0
+## SavedVariablesPerCharacter: HarkenedDB
+
+Locales\enUS.lua
+Core.lua
+Sound.lua
+Chat.lua
+Config.lua
