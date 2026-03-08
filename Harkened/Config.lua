@@ -268,3 +268,98 @@ local function refresh()
 end
 
 panel:SetScript("OnShow", refresh)
+
+-- ── Slash command ──────────────────────────────────────────────────────────
+
+local function printHelp()
+    local c = "|cff00ccff"
+    local r = "|r"
+    print(c .. "Harkened" .. r .. " commands:")
+    print("  /hark              – open settings panel")
+    print("  /hark on|off       – enable / disable")
+    print("  /hark add <word>   – add a keyword")
+    print("  /hark remove <word>– remove a keyword")
+    print("  /hark test         – play alert sound")
+    print("  /hark status       – show current settings")
+
+end
+
+function Harkened:InitSlash()
+    SLASH_HARKENED1 = "/hark"
+    SLASH_HARKENED2 = "/harkened"
+    SlashCmdList.HARKENED = function(msg)
+        local cmd, arg = msg:match("^(%S+)%s*(.*)")
+        cmd = (cmd or ""):lower()
+        arg = arg or ""
+
+        if cmd == "" then
+            Settings.OpenToCategory(Harkened.settingsCategory)
+
+        elseif cmd == "on" then
+            Harkened.db.enabled = true
+            print("|cff00ccffHarkened|r enabled.")
+
+        elseif cmd == "off" then
+            Harkened.db.enabled = false
+            print("|cff00ccffHarkened|r disabled.")
+
+        elseif cmd == "add" then
+            if arg == "" then
+                print("|cff00ccffHarkened|r Usage: /hark add <keyword>")
+            else
+                local kw = arg:match("^%s*(.-)%s*$")
+                local lower = kw:lower()
+                for _, existing in ipairs(Harkened.db.keywords) do
+                    if existing:lower() == lower then
+                        print("|cff00ccffHarkened|r \"" .. kw .. "\" is already in the keyword list.")
+                        return
+                    end
+                end
+                Harkened.db.keywords[#Harkened.db.keywords + 1] = kw
+                print("|cff00ccffHarkened|r Added keyword: \"" .. kw .. "\"")
+            end
+
+        elseif cmd == "remove" then
+            if arg == "" then
+                print("|cff00ccffHarkened|r Usage: /hark remove <keyword>")
+            else
+                local kw = arg:match("^%s*(.-)%s*$")
+                local lower = kw:lower()
+                local found = false
+                local newList = {}
+                for _, existing in ipairs(Harkened.db.keywords) do
+                    if existing:lower() == lower then
+                        found = true
+                    else
+                        newList[#newList + 1] = existing
+                    end
+                end
+                if found then
+                    Harkened.db.keywords = newList
+                    print("|cff00ccffHarkened|r Removed keyword: \"" .. kw .. "\"")
+                else
+                    print("|cff00ccffHarkened|r Keyword not found: \"" .. kw .. "\"")
+                end
+            end
+
+        elseif cmd == "test" then
+            Harkened:TriggerAlert(true)
+            print("|cff00ccffHarkened|r Playing alert sound.")
+
+        elseif cmd == "status" then
+            local db = Harkened.db
+            print("|cff00ccffHarkened|r Status:")
+            print("  Enabled : " .. (db.enabled and "yes" or "no"))
+            print("  Keywords: " .. (#db.keywords > 0 and table.concat(db.keywords, ", ") or "(none)"))
+            print("  Throttle: " .. db.throttle .. "s")
+            local chList = {}
+            for ch, on in pairs(db.channels) do
+                if on then chList[#chList + 1] = ch end
+            end
+            print("  Channels: " .. (#chList > 0 and table.concat(chList, ", ") or "(none)"))
+
+        else
+            printHelp()
+        end
+    end
+end

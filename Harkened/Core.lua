@@ -20,22 +20,6 @@ local function initDB()
     Harkened.db = db
 end
 
--- Dev tool: /hark dumpsounds
--- Iterates SOUNDKIT, saves all valid int32 IDs to HarkenedDB.soundDump, then
--- instructs the user to log out so WoW flushes SavedVariables to disk.
-function Harkened:DumpSounds()
-    local INT32_MAX = 2147483647
-    local results = {}
-    for k, v in pairs(SOUNDKIT) do
-        if type(v) == "number" and v > 0 and v <= INT32_MAX then
-            results[#results + 1] = { name = k, id = v }
-        end
-    end
-    table.sort(results, function(a, b) return a.name < b.name end)
-    self.db.soundDump = results
-    print("|cff00ccffHarkened|r Sound dump saved: " .. #results .. " valid sounds.")
-    print("|cff00ccffHarkened|r Log out (don't reload) to write to disk.")
-end
 
 local frame = CreateFrame("Frame")
 frame:RegisterEvent("ADDON_LOADED")
@@ -47,13 +31,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
             initDB()
             Harkened:InitSounds()
             Harkened:InitChat()
-            -- Temporary slash command until Config.lua slash handler is built (Milestone 6)
-            SLASH_HARKENED1 = "/hark"
-            SlashCmdList.HARKENED = function(msg)
-                if msg == "dumpsounds" then
-                    Harkened:DumpSounds()
-                end
-            end
+            Harkened:InitSlash()
             print("|cff00ccffHarkened|r loaded.")
         end
     end
